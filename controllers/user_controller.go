@@ -160,11 +160,12 @@ func (r *UserReconciler) updateUser(ctx context.Context, user *userv1alpha1.User
 
 	if user.Spec.SandBoxCount != user.Status.SandBoxCount {
 		if user.Spec.SandBoxCount < user.Status.SandBoxCount {
-			log.Info("Spec count is less than status count, deleting old sandboxes")
+			log.Info("Spec count is less than status count")
 		} else {
 			log.Info("Spec count is greater than status count, creating new sandboxes")
+			log.WithValues("count", user.Spec.SandBoxCount)
 
-			r.createSandBoxes(ctx, user, user.Spec.SandBoxCount+1)
+			r.createSandBoxes(ctx, user, user.Status.SandBoxCount+1)
 			user.Status.SandBoxCount = user.Spec.SandBoxCount
 			r.Client.Update(ctx, user)
 		}
