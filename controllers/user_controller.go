@@ -161,13 +161,19 @@ func (r *UserReconciler) updateUser(ctx context.Context, user *userv1alpha1.User
 	if user.Spec.SandBoxCount != user.Status.SandBoxCount {
 		if user.Spec.SandBoxCount < user.Status.SandBoxCount {
 			log.Info("Spec count is less than status count")
+			user.Spec.SandBoxCount = user.Status.SandBoxCount
 		} else {
 			log.Info("Spec count is greater than status count, creating new sandboxes")
-			log.WithValues("count", user.Spec.SandBoxCount)
-
 			r.createSandBoxes(ctx, user, user.Status.SandBoxCount+1)
-			user.Status.SandBoxCount = user.Spec.SandBoxCount
-			r.Client.Update(ctx, user)
+			for {
+				if user.Status.SandBoxCount >= user.Spec.SandBoxCount {
+					break
+				}
+				user.Status.SandBoxCount++
+				log.Info("Updating.............")
+			}
+
+			r.Status().Update(ctx, user)
 		}
 	}
 
@@ -198,7 +204,6 @@ func (r *UserReconciler) deleteUser(ctx context.Context, user *userv1alpha1.User
 			return reconcilerUtil.ManageError(r.Client, sandBox, err, false)
 
 		}
-		log.Info("scope inside for loop to delete sandboxes")
 		if strings.Contains(sandBox.Spec.Name, userName) {
 			r.Client.Delete(ctx, sandBox)
 		}
