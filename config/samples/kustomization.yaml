@@ -1,0 +1,5 @@
+## Append samples you want in your CSV to this file as resources ##
+resources:
+- sandbox_v1alpha1_user.yaml
+- sandbox_v1alpha1_sandbox.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples
